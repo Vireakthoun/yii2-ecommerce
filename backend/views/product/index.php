@@ -21,29 +21,62 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Product', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); 
+    ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        // 'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
-            'name',
-            'description:ntext',
-            'image',
-            'price',
-            //'status',
-            //'created_at',
-            //'updated_at',
+            [
+                'attribute' => 'Image',
+                'contentOptions' => [
+                    'style' => 'width: 60px',
+                ],
+                'content' => function ($model) {
+                    /**
+                     * @var \common\models\Product $model
+                     */
+                    return Html::img($model->getImageUrl(), ['style' => 'width:85px']);
+                }
+            ],
+            [
+                'attribute' => 'name',
+                'contentOptions' => [
+                    'style' => 'width: 160px'
+                ]
+            ],
+            'price:currency',
+            [
+                'attribute' => 'created_at',
+                'format' => ['datetime'],
+                'contentOptions' => [
+                    'style' => 'white-space: nowrap'
+                ]
+            ],
+            [
+                'attribute' => 'updated_at',
+                'format' => ['datetime'],
+                'contentOptions' => [
+                    'style' => 'white-space: nowrap'
+                ]
+            ],
+            [
+                'attribute' => 'Status',
+                'content' => function ($model) {
+                    return Html::tag('span', $model->status ? 'Active' : 'Inactive', [
+                        'class' => $model->status ? 'badge badge-success' : 'badge badge-warning'
+                    ]);
+                }
+            ],
             //'created_by',
             //'updated_by',
             [
-                'class' => ActionColumn::className(),
+                'class' => ActionColumn::class,
                 'urlCreator' => function ($action, Product $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                }
             ],
         ],
     ]); ?>
