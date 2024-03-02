@@ -30,9 +30,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'attribute' => 'Image',
+                'attribute' => 'image',
                 'contentOptions' => [
-                    'style' => 'width: 60px',
+                    'style' => 'width: 160px',
                 ],
                 'content' => function ($model) {
                     /**
@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ],
             [
-                'attribute' => 'Status',
+                'attribute' => 'status',
                 'content' => function ($model) {
                     return Html::tag('span', $model->status ? 'Active' : 'Inactive', [
                         'class' => $model->status ? 'badge badge-success' : 'badge badge-warning'
