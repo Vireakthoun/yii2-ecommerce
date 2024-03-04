@@ -155,4 +155,11 @@ class Product extends \yii\db\ActiveRecord
             return Yii::$app->params['frontendUrl'] . '/img/photo.svg';
         }
     }
+    /**
+     * create version of short description
+     */
+    public function getShortDescription()
+    {
+        return \yii\helpers\StringHelper::truncateWords(strip_tags($this->description), 20);
+    }
 }
