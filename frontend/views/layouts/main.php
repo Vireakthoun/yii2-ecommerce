@@ -5,10 +5,11 @@
 
 use common\widgets\Alert;
 use frontend\assets\AppAsset;
-use yii\bootstrap4\Breadcrumbs;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Nav;
 use yii\bootstrap4\NavBar;
+
+$cartItemCount = $this->params['cartItemCount'];
 
 AppAsset::register($this);
 ?>
@@ -37,26 +38,37 @@ AppAsset::register($this);
             ],
         ]);
         $menuItems = [
-            ['label' => 'Home', 'url' => ['/site/index']],
+            [
+                'label' => 'Cart <span id="cart-quantity" class="badge badge-danger">' . $cartItemCount . '</span>',
+                'url' => ['/cart/index'],
+                'encode' => false
+            ],
         ];
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
+            $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        } else {
+            $menuItems[] = [
+                'label' => Yii::$app->user->identity->username,
+                'items' => [
+                    [
+                        'label' => 'Profile',
+                        'url' => ['/profile/index']
+                    ],
+                    [
+                        'label' => 'Logout',
+                        'url' => ['/site/logout'],
+                        'linkOptions' => [
+                            'data-method' => 'post'
+                        ]
+                    ]
+                ]
+            ];
         }
-
         echo Nav::widget([
             'options' => ['class' => 'navbar-nav ml-auto'],
             'items' => $menuItems,
         ]);
-        if (Yii::$app->user->isGuest) {
-            echo Html::tag('div', Html::a('Login', ['/site/login'], ['class' => ['btn btn-link login text-decoration-none']]), ['class' => ['d-flex']]);
-        } else {
-            echo Html::beginForm(['/site/logout'], 'post', ['class' => 'd-flex'])
-                . Html::submitButton(
-                    'Logout (' . Yii::$app->user->identity->username . ')',
-                    ['class' => 'btn btn-link logout text-decoration-none']
-                )
-                . Html::endForm();
-        }
         NavBar::end();
         ?>
     </header>

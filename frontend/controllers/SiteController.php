@@ -7,7 +7,6 @@ use frontend\models\VerifyEmailForm;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
@@ -15,14 +14,12 @@ use common\models\Product;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
-use frontend\models\ContactForm;
 use yii\data\ActiveDataProvider;
-use yii\rest\ActiveController;
 
 /**
  * Site controller
  */
-class SiteController extends Controller
+class SiteController extends \frontend\base\Controller
 {
     /**
      * {@inheritdoc}

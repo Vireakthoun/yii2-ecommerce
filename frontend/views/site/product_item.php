@@ -2,7 +2,7 @@
 
 /** @var \common\models\Product $model */
 
-use yii\widgets\Pjax;
+use yii\helpers\Url;
 
 ?>
 
@@ -35,6 +35,6 @@ use yii\widgets\Pjax;
     </div>
     <!-- Product actions-->
     <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-        <a class="btn btn-success btn-block" href="#">Add to cart</a>
+        <a href="<?= Url::to('/cart/add') ?>" class="btn btn-success btn-block btn-add-to-cart">Add to cart</a>
     </div>
 </div>
