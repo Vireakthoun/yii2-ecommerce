@@ -31,4 +31,23 @@ class CardItemQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+
+    /**
+     * @param $userId
+     * @return \common\models\query\CardItemQuery
+     */
+    public function userId($userId)
+    {
+        return $this->andWhere(['user_id' => $userId]);
+    }
+
+    /**
+     * @param $userId
+     * @return \common\models\query\CardItemQuery
+     */
+    public function productId($productId)
+    {
+        return $this->andWhere(['product_id' => $productId]);
+    }
 }
