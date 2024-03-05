@@ -15,7 +15,9 @@ class AppAsset extends AssetBundle
         'css/site.css',
         'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css'
     ];
-    public $js = [];
+    public $js = [
+        'js/app.js'
+    ];
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap4\BootstrapAsset',
