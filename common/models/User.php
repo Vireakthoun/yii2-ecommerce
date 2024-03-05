@@ -24,12 +24,16 @@ use yii\web\IdentityInterface;
  * @property integer $created_at
  * @property integer $updated_at
  * @property string $password write-only password
+ * @property \common\models\UserAddress[] $address
  */
 class User extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
+
+    public $password;
+    public $passwordConfirm;
 
 
     /**
@@ -56,6 +60,8 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            [['username', 'firstname',  'lastname', 'email'], 'required'],
+            [['username', 'firstname',  'lastname', 'email'], 'string', 'max' => '255'],
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
         ];
@@ -218,5 +224,21 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $fullname = trim($this->firstname . ' ' . $this->lastname);
         return $fullname ?: $this->email;
+    }
+
+    public function getAddresses()
+    {
+        return $this->hasMany(UserAddress::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \common\models\UserAddress |null
+     */
+
+    public function getAddress(): ?UserAddress
+    {
+        $address = $this->addresses[0] ?? new UserAddress();
+        $address->user_id = $this->id;
+        return $address;
     }
 }
