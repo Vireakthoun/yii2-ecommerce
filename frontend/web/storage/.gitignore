@@ -6,6 +6,7 @@
 *.bmp
 *.svg
 *.ico
+*.webp
 
 # Ignore thumbnails and resized images if you generate them
 /thumbnails/
