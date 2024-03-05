@@ -19,7 +19,7 @@ class CardItem extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'card_item';
+        return '{{%card_item}}';
     }
 
     /**
@@ -28,6 +28,7 @@ class CardItem extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['product_id', 'quantity'], 'required'],
             [['product_id', 'quantity', 'user_id'], 'integer'],
         ];
     }
@@ -43,6 +44,21 @@ class CardItem extends \yii\db\ActiveRecord
             'quantity' => 'Quantity',
             'user_id' => 'User ID',
         ];
+    }
+
+    /**
+     * get query for [[Product]]
+     * @return \yii\db\ActiveQuery|\common\models\query\ProductQuery
+     */
+
+    public function getProduct()
+    {
+        return $this->hasOne(Product::class, ['id' => 'product_id']);
+    }
+
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
     /**
