@@ -73,4 +73,22 @@ class CardItem extends \yii\db\ActiveRecord
     {
         return new \common\models\query\CardItemQuery(get_called_class());
     }
+
+    public static function getTotalQuantity($currUserId)
+    {
+        if (isGuest()) {
+            $cartItems = \Yii::$app->session->get(CardItem::SESSION_KEY, []);
+            $sum = 0;
+            foreach ($cartItems as $cartItem) {
+                $sum += $cartItem['quantity'];
+            }
+        } else {
+            $sum = CardItem::findBySql(
+                "SELECT SUM(quantity) FROM card_item WHERE user_id = :userId",
+                ['userId' =>  $currUserId]
+            )->scalar();
+        }
+
+        return $sum;
+    }
 }

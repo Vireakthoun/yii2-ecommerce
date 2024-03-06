@@ -1,8 +1,8 @@
 $(function(){
 
     const $cartQuantity = $('#cart-quantity')
-
     const $addToCart = $('.btn-add-to-cart');
+    const $itemQuantities = $('.item-quantity')
     $addToCart.click(function(ev){
         ev.preventDefault();
         const $this = $(ev.target);
@@ -18,5 +18,20 @@ $(function(){
                 $cartQuantity.text(parseInt($cartQuantity.text() || 0) +1);
             }
         })
+    });
+
+    $itemQuantities.change(ev=> {
+        const $this = $(ev.target);
+        let $tr = $this.closest('tr');
+        const id = $tr.data('id');
+
+        $.ajax({
+            method: 'POST',
+            url: $tr.data('url'),
+            data: {id, quantity: $this.val()},
+            success: function(totalQuantity){
+                $cartQuantity.text(totalQuantity)
+            }
+        });
     });
 });
