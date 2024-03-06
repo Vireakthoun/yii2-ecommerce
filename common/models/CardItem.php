@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\web\Session;
 
 /**
  * This is the model class for table "card_item".
@@ -14,6 +15,9 @@ use Yii;
  */
 class CardItem extends \yii\db\ActiveRecord
 {
+
+    const SESSION_KEY = 'CART_ITEMS';
+
     /**
      * {@inheritdoc}
      */
