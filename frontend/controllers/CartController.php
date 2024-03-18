@@ -2,8 +2,12 @@
 
 namespace frontend\controllers;
 
+use BadMethodCallException;
 use common\models\CardItem;
+use common\models\Order;
+use common\models\OrderAddress;
 use common\models\Product;
+use Yii;
 use yii\filters\ContentNegotiator;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
@@ -16,7 +20,7 @@ class CartController extends \frontend\base\Controller
         return [
             [
                 'class' => ContentNegotiator::class,
-                'only' => ['add'],
+                'only' => ['add', 'create-order'],
                 'formats' => [
                     'application/json' => Response::FORMAT_JSON,
                 ],
@@ -25,6 +29,7 @@ class CartController extends \frontend\base\Controller
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST', 'DELETE'],
+                    'create-order' => ['POST'],
                 ]
             ]
         ];
@@ -32,25 +37,8 @@ class CartController extends \frontend\base\Controller
 
     public function actionIndex()
     {
-        if (\Yii::$app->user->isGuest) {
-            $cartItems = \Yii::$app->session->get(CardItem::SESSION_KEY, []);
-        } else {
-            $cartItems = CardItem::findBySql(
-                '
-                   SELECT 
-                    c.product_id as id, 
-                    p.image, 
-                    p.`name`,
-                    p.price,
-                    c.quantity,
-                    p.price*c.quantity as total_price 
-                    FROM card_item c
-                    LEFT JOIN product p on p.id = c.product_id
-                    WHERE c.user_id = :userId
-                ',
-                ['userId' => \Yii::$app->user->id]
-            )->asArray()->all();
-        }
+
+        $cartItems = CardItem::getItemForUser(currUserId());
 
         return $this->render('index', [
             'items' => $cartItems
@@ -157,5 +145,86 @@ class CartController extends \frontend\base\Controller
         }
 
         return CardItem::getTotalQuantity(currUserId());
+    }
+
+
+    public function actionCheckout()
+    {
+        $cartItems = CardItem::getItemForUser(currUserId());
+        if (empty($cartItems)) {
+            return $this->redirect([Yii::$app->homeUrl]);
+        }
+
+        $order = new Order();
+        $orderAddress = new OrderAddress();
+
+        if (!isGuest()) {
+
+            /** @var \common\models\User $user */
+            $user = Yii::$app->user->identity;
+            $userAddress =  $user->getAddress();
+
+            $order->firstname = $user->firstname;
+            $order->lastname = $user->lastname;
+            $order->email = $user->email;
+            $order->status = Order::STATUS_DRAFT;
+
+            $orderAddress->address = $userAddress->address;
+            $orderAddress->city = $userAddress->city;
+            $orderAddress->state = $userAddress->state;
+            $orderAddress->country = $userAddress->country;
+            $orderAddress->zipcode = $userAddress->zipcode;
+        }
+        $productQuantity = CardItem::getTotalQuantity(currUserId());
+        $totalPrice = CardItem::getTotalPrice(currUserId());
+
+        return $this->render('checkout', [
+            'order' => $order,
+            'orderAddress' => $orderAddress,
+            'cartItems' => $cartItems,
+            'productQuantity' => $productQuantity,
+            'totalPrice' => $totalPrice
+        ]);
+    }
+
+    public function actionCreateOrder()
+    {
+        $transactionId = Yii::$app->request->post('transactionId');
+        $status = Yii::$app->request->post('status');
+
+        $totalPrice = CardItem::getTotalPrice(currUserId());
+
+        if ($totalPrice == null) {
+            throw new BadMethodCallException();
+        }
+
+        $order = new Order();
+        $order->transaction_id = $transactionId;
+        $order->total_price = $totalPrice;
+        $order->status = $status === 'COMPLETED' ? Order::STATUS_COMPLETED : Order::STATUS_FAILURED;
+        $order->create_at = time();
+        $order->created_by = currUserId();
+
+        $transaction = Yii::$app->db->beginTransaction();
+        $orderAddress = new OrderAddress();
+        if (($order->load(Yii::$app->request->post()) && $order->save())
+            && $order->save()
+            && $order->saveAddress(Yii::$app->request->post())
+            && $order->saveOrderItems()
+        ) {
+            $transaction->commit();
+
+            CardItem::clearCartItem(currUserId());
+
+            return [
+                'success' => true
+            ];
+        } else {
+            $transaction->rollBack();
+            return [
+                'success' => false,
+                'errors' => $order->errors
+            ];
+        }
     }
 }
